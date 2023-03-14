@@ -1,0 +1,2322 @@
+<html>
+<!-- -----------------------------------------------------/
+ // Original Code Structure: Dr Ioannis Kypraios         /
+ // Modified by: Preethi Leelavathy                      /
+ //Project: Smart Music Recommendation System            /
+ //Description: Development Platform                     /
+ //             for PDF Report                           /
+ //Date: September-2nd 2022                              /
+ //------------------------------------------------------/
+-->
+<head>
+  <title>Music Recommendations PlayGround</title>
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-firestore.js"></script>
+
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- to enable clusters: -->
+  <script src="https://unpkg.com/@google/markerclustererplus@4.0.1/dist/markerclustererplus.min.js"></script>
+
+
+</head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
+
+ <!-- Webpade layout set up -->
+<p><body>
+  <h1 id="siteOutput">Smart Music Recommendation System</h1>
+  <h1 id="PDFGenerator">PDF Report Generator</h1>
+
+  <h2> 1.Add Client Structure </h2>
+    <p>
+      <input type="file" id="clientInput">
+    </p>
+
+  <h2> 2.Add Images </h2>
+    <p>
+      <input type="file" id="files" name="files[]" multiple />
+      <output id="list"></output>
+    </p>
+    <p>
+      <button id="Add" type="button">Add Images</button>
+    </p>
+
+    <!-- RADIO BUTTONS FOR 3 CATEGORIES -->
+  <h2> 3.Select your preference </h2>
+  <p>
+    <style>
+    /* The container */
+    .container {
+      line-height: 0.5em;
+      padding-left: 35px;
+      font-size: 8px;
+    }
+    </style>
+    <body>
+    <div>
+      <!-- conditioned to be disabled after 2 selections  -->
+    <b1>Note: Only 2 of the 3 preferences can be selected. Select any 2 categories. </b1> </div>
+
+    <h4>i. Ranking</h4>
+    <b1>Select one of the following Rankings </b1>
+    <div> <input class='container' type="radio" name='radio1' onchange='checkFunc();' value='1' /><label>Top 10</label></div>
+     <div><input class='container' type="radio" name='radio1' onchange='checkFunc();' value='2'/><label>Top 20</label></div>
+     <div><input class='container' type="radio" name='radio1' onchange='checkFunc();' value='3'/><label>Top 30</label></div>
+     <!-- <br class='container'><br> -->
+    <h4>ii. Genre</h4>
+    <b1>Select one of the following Genres </b1>
+    <div><input class='container' type="radio" name='radio2' onchange='checkFunc();' value='1' /><label>Classical</label></div>
+    <div><input class='container' type="radio" name='radio2' onchange='checkFunc();' value='2' /><label>Rock</label></div>
+    <div><input class='container' type="radio" name='radio2' onchange='checkFunc();' value='3' /><label>RnB</label></div>
+    <div><input class='container' type="radio" name='radio2' onchange='checkFunc();' value='4' /><label>Pop</label></div>
+   <!-- <br class='container'><br> -->
+   <h4>iii. Emotion</h4>
+    <b1>Select one of the following Emotions</b1>
+    <div><input class='container' type="radio" name='radio3' onchange='checkFunc();' value ='1' /><label>Happy</label></div>
+    <div><input class='container' type="radio" name='radio3' onchange='checkFunc();' value='2' /><label>Calm</label></div>
+    <div><input class='container' type="radio" name='radio3' onchange='checkFunc();' value='3' /><label>Sad</label></div>
+    <div><input class='container' type="radio" name='radio3' onchange='checkFunc();' value='4' /><label>Angry</label></div>
+    <br class='container'><br>
+  </body>
+  </html>
+
+</p>
+  <h2> 4.Download PDF </h2>
+  <p>
+      <button id="export" type="button">Export</button>
+  </p>
+<br><br><br><br>
+
+ <!-- Draw table with ALL 50 albums on the PDF -->
+  <table id="mytable">
+    <thead>
+      <tr>
+        <th>Album Name</th>
+        <th>Year</th>
+        <th>Artist Name</th>
+        <th>Genre</th>
+        <th>Emotion</th>
+        <th>Album Cover</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+    </tbody>
+  </table>
+
+<!-- Draw table with Top 3 Euclidean distance recommendations on the PDF -->
+  <table id="mytable1">
+    <thead>
+      <tr>
+        <th>Euclidean Score</th>
+        <th>Album Name</th>
+        <th>Artist Name</th>
+        <th>Ranking</th>
+        <th>Genre</th>
+        <th>Emotion</th>
+        <th>Album Cover</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="righ">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+    </tbody>
+  </table>
+
+<!-- Draw table with Top 3 Manhattan Distance recommendations for the PDF -->
+  <table id="mytable2">
+    <thead>
+      <tr>
+        <th>Manhattan Score</th>
+        <th>Album Name</th>
+        <th>Artist Name</th>
+        <th>Ranking</th>
+        <th>Genre</th>
+        <th>Emotion</th>
+        <th>Album Cover</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="righ">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+    </tbody>
+  </table>
+
+<!-- Draw table with Top 3 RBF recommendations for the PDF -->
+  <table id="mytable3">
+    <thead>
+      <tr>
+        <th>RBF Score</th>
+        <th>Album Name</th>
+        <th>Artist Name</th>
+        <th>Ranking</th>
+        <th>Genre</th>
+        <th>Emotion</th>
+        <th>Album Cover</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="righ">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+      <tr>
+        <td align="right">  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td>  </td>
+        <td><img src=" " /></td>
+      </tr>
+    </tbody>
+  </table>
+
+ <script type="text/javascript">
+    var pdf = new jsPDF("p", "mm", "a4");
+
+
+    //----------------------------------------------------------------------------//
+    //Initialise firebase
+
+    var firebaseConfig = {
+      apiKey: "AIzaSyD--K3d9Erx-Jour6ocqhbVHSxcmJ9wOHQ",
+      authDomain: "musicrecommendationplayground.firebaseapp.com",
+      projectId: "musicrecommendationplayground",
+      storageBucket: "musicrecommendationplayground.appspot.com",
+      messagingSenderId: "400155472881",
+      appId: "1:400155472881:web:f085986c5ca84e33c04a50",
+      measurementId: "G-708XLELYN3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var firestore = firebase.firestore();
+
+    const settings = {/* your settings... */ timestampsInSnapshots: true};
+    firestore.settings(settings);
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    // Create a new Document in the collection Samples of Firestore
+    // Config file to add path of smartnotes documents in Firestore database used
+
+    var docRef2 = firestore.doc("MusicBox/SiteTestNote");//("smart_notes/SiteTestNote");
+
+    var docRef3;                                                         //smartnote1
+    var docRef4;                                                         //smartnote2
+    var docRef5;                                                         //smartnote3
+    var docRef6;                                                         //smartnote4
+    var docRef7;                                                         //smartnote5
+    var docRef8;                                                         //smartnote6
+    var docRef9;                                                         //smartnote7
+    var docRef10;                                                        //smartnote8
+    var docRef11;                                                        //smartnote9
+//    var docRef12;                                                        //smartnote10
+    var docRef13;                                                        //smartnote11
+    var docRef14;                                                        //smartnote12
+    var docRef15;                                                        //smartnote13
+    var docRef16;                                                        //smartnote14
+    var docRef17;                                                        //smartnote15
+    var docRef18;                                                        //smartnote16
+    var docRef19;                                                        //smartnote17
+    var docRef20;                                                         //smartnote18
+    var docRef21;                                                         //smartnote19
+    var docRef22;                                                         //smartnote20
+    var docRef23;                                                         //smartnote21
+    var docRef24;                                                         //smartnote22
+    var docRef25;                                                         //smartnote23
+    var docRef26;                                                         //smartnote24
+    var docRef27;                                                         //smartnote25
+    var docRef28;                                                         //smartnote26
+    var docRef29;                                                         //smartnote27
+    var docRef30;                                                         //smartnote28
+    var docRef31;                                                         //smartnote29
+    var docRef32;                                                         //smartnote30
+    var docRef33;                                                         //smartnote31
+    var docRef34;                                                         //smartnote32
+    var docRef35;                                                         //smartnote33
+    var docRef36;                                                         //smartnote34
+    var docRef37;                                                         //smartnote35
+    var docRef38;                                                         //smartnote36
+    var docRef39;                                                         //smartnote37
+    var docRef40;                                                         //smartnote38
+    var docRef41;                                                         //smartnote39
+    var docRef42;                                                         //smartnote40
+    var docRef43;                                                         //smartnote41
+    var docRef44;                                                         //smartnote42
+    var docRef45;                                                         //smartNote43
+    var docRef46;                                                         //smartnote44
+    var docRef47;                                                         //smartnote45
+    var docRef48;                                                         //smartnote46
+    var docRef49;                                                         //smartnote47
+    var docRef50;                                                         //smartnote48
+    var docRef51;                                                         //smartnote49
+    var docRef52;                                                         //smartnote50
+    var docRef53;
+
+    //Debugging
+    //var docRef12 = firestore.doc("samples/Sites");//"sites/0iB4wvssvbkDFoWsvxgs"
+  //--------------------------------------------------------------------------//
+ </script>
+
+<!-- calling the main script and the map function  -->
+
+<script src="main_MRS.js"></script>
+
+<script src="myMap_MRS.js"></script>
+
+<!--Style of Layout with CSS-->
+  <style media="screen">
+  body {
+      background-color: #cadded;
+      font: 1em/150% verdana, arial, helvetica, sans-serif;
+   }
+  h1 {
+     font-size: 1.5em;
+     text-align: center;
+   }
+
+  #choose {
+      max-width: 12em;
+      padding: 1em;
+      margin: auto;
+      border: 0.062em solid #000;
+      background-color: #fff;
+   }
+  .hidden {
+     display: none;
+   }
+  </style>
+
+</body></p>
+
+<!-- graph to display 4 emotion category analytics  -->
+<div></div>
+<div class="span9">
+     <h3> Plot Results </h3>
+
+     <canvas id="myCanvas" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+
+<div class="span9">
+     <h3> Draw Image 1 -Logo</h3>
+     <canvas id="myCanvas2" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+
+<div class="span9">
+     <h4> Draw Image 2 -Smartnotes1</h4>
+     <canvas id="myCanvas2a" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2a" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 3 -Smartnotes2</h4>
+     <canvas id="myCanvas2b" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2b" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 4 -Smartnotes3</h4>
+     <canvas id="myCanvas2c" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2c" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 5 -Smartnotes4</h4>
+     <canvas id="myCanvas2d" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2d" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 6 -Smartnotes5</h4>
+     <canvas id="myCanvas2e" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2e" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 7 -Smartnotes6</h4>
+     <canvas id="myCanvas2f" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2f" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 8 -Smartnotes7</h4>
+     <canvas id="myCanvas2g" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2g" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 9 -Smartnotes8</h4>
+     <canvas id="myCanvas2h" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2h" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 10 -Smartnotes9</h4>
+     <canvas id="myCanvas2i" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2i" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 11 -Smartnotes10</h4>
+     <canvas id="myCanvas2j" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2j" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 12 -Smartnotes11</h4>
+     <canvas id="myCanvas2k" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2k" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 13 -Smartnotes12</h4>
+     <canvas id="myCanvas2l" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2l" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 14 -Smartnotes13</h4>
+     <canvas id="myCanvas2m" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2m" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 15 -Smartnotes14</h4>
+     <canvas id="myCanvas2n" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2n" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 16 -Smartnotes15</h4>
+     <canvas id="myCanvas2o" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2o" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 17 -Smartnotes16</h4>
+     <canvas id="myCanvas2p" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2p" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 18 -Smartnotes17</h4>
+     <canvas id="myCanvas2q" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2q" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 19 -Smartnotes18</h4>
+     <canvas id="myCanvas2r" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2r" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 20 -Smartnotes19</h4>
+     <canvas id="myCanvas2s" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2s" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 21 -Smartnotes20</h4>
+     <canvas id="myCanvas2t" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2t" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 22 -Smartnotes21</h4>
+     <canvas id="myCanvas2u" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2u" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 23 -Smartnotes22</h4>
+     <canvas id="myCanvas2v" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2v" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 24 -Smartnotes23</h4>
+     <canvas id="myCanvas2w" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2w" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 25 -Smartnotes24</h4>
+     <canvas id="myCanvas2x" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2x" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 26 -Smartnotes25</h4>
+     <canvas id="myCanvas2y" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2y" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 27 -Smartnotes26</h4>
+     <canvas id="myCanvas2z" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2z" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 28 -Smartnotes27</h4>
+     <canvas id="myCanvas2aa" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2aa" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 29 -Smartnotes28</h4>
+     <canvas id="myCanvas2bb" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2bb" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 30 -Smartnotes29</h4>
+     <canvas id="myCanvas2cc" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2cc" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 31 -Smartnotes30</h4>
+     <canvas id="myCanvas2dd" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2dd" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 32 -Smartnotes31</h4>
+     <canvas id="myCanvas2ee" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2ee" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 33 -Smartnotes32</h4>
+     <canvas id="myCanvas2ff" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2ff" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 34 -Smartnotes33</h4>
+     <canvas id="myCanvas2gg" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2gg" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 35 -Smartnotes34</h4>
+     <canvas id="myCanvas2hh" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2hh" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 36 -Smartnotes35</h4>
+     <canvas id="myCanvas2ii" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2ii" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 37 -Smartnotes36</h4>
+     <canvas id="myCanvas2jj" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2jj" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 38 -Smartnotes37</h4>
+     <canvas id="myCanvas2kk" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2kk" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 39 -Smartnotes38</h4>
+     <canvas id="myCanvas2ll" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2ll" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 40 -Smartnotes39</h4>
+     <canvas id="myCanvas2mm" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2mm" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 41 -Smartnotes40</h4>
+     <canvas id="myCanvas2nn" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2nn" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 42 -Smartnotes41</h4>
+     <canvas id="myCanvas2oo" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2oo" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 43 -Smartnotes42</h4>
+     <canvas id="myCanvas2pp" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2pp" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 44 -Smartnotes43</h4>
+     <canvas id="myCanvas2qq" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2qq" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 45 -Smartnotes44</h4>
+     <canvas id="myCanvas2rr" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2rr" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 46 -Smartnotes45</h4>
+     <canvas id="myCanvas2ss" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2ss" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 47 -Smartnotes46</h4>
+     <canvas id="myCanvas2tt" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2tt" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 48 -Smartnotes47</h4>
+     <canvas id="myCanvas2uu" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2uu" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 49 -Smartnotes48</h4>
+     <canvas id="myCanvas2vv" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2vv" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 50 -Smartnotes49</h4>
+     <canvas id="myCanvas2ww" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2ww" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+<div class="span9">
+     <h4> Draw Image 51 -Smartnotes50</h4>
+     <canvas id="myCanvas2xx" style="height: 300px; width: 100%;"></canvas>
+     <div class="container-fluid">
+        <div id="colChartContainer2xx" style="height: 300px; width: 100%;"></div>
+     </div>
+</div>
+
+<div class="span9">
+  <h2> Google Map </h2>
+  <canvas id="myCanvas3" style="height: 300px; width: 100%;"></canvas>
+  <div class="container-fluid">
+    <!--The div element for the map -->
+    <div class="row map-container"><div id="map1" style="height: 400px; width: 100%;"></div></div>
+ </div>
+
+<!-- Async script executes immediately and must be after any DOM elements used in callback.ToDo: The map address needs to be replaced by a reference to a config file -->
+<script
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_vHDQEGtS7yz-XphMZaAvaIspmxomJLA&region=GB&language=GB&map_ids=13d3c2ff8f19451f&callback=initMap&libraries=&v=weekly"
+async>
+</script>
+
+<script type="text/javascript">
+
+//----------------------------------------------------------------------------//
+// Working code for adding images from client stucture text file into the PDF.
+// Due to graphics rendering reasons and OS delays, the code below
+// must be in the html file and not in a separate .js file.
+var imageFile = document.getElementById("choose2");
+
+var canvas2 = document.getElementById("myCanvas2");//logo
+var canvas2a = document.getElementById("myCanvas2a");//smartnote1
+var canvas2b = document.getElementById("myCanvas2b");//smartnote2
+var canvas2c = document.getElementById("myCanvas2c");//smartnote3
+var canvas2d = document.getElementById("myCanvas2d");//smartnote4
+var canvas2e = document.getElementById("myCanvas2e");//smartnote5
+var canvas2f = document.getElementById("myCanvas2f");//smartnote6
+var canvas2g = document.getElementById("myCanvas2g");//smartnote7
+var canvas2h = document.getElementById("myCanvas2h");//smartnote8
+var canvas2i = document.getElementById("myCanvas2i");//smartnote9
+var canvas2j = document.getElementById("myCanvas2j");//smartnote10
+var canvas2k = document.getElementById("myCanvas2k");//smartnote11
+var canvas2l = document.getElementById("myCanvas2l");//smartnote12
+var canvas2m = document.getElementById("myCanvas2m");//smartnote13
+var canvas2n = document.getElementById("myCanvas2n");//smartnote14
+var canvas2o = document.getElementById("myCanvas2o");//smartnote15
+var canvas2p = document.getElementById("myCanvas2p");//smartnote16
+var canvas2q = document.getElementById("myCanvas2q");//smartnote17
+var canvas2r = document.getElementById("myCanvas2r");//smartnote18
+var canvas2s = document.getElementById("myCanvas2s");//smartnote19
+var canvas2t = document.getElementById("myCanvas2t");//smartnote20
+var canvas2u = document.getElementById("myCanvas2u");//smartnote21
+var canvas2v = document.getElementById("myCanvas2v");//smartnote22
+var canvas2w = document.getElementById("myCanvas2w");//smartnote23
+var canvas2x = document.getElementById("myCanvas2x");//smartnote24
+var canvas2y = document.getElementById("myCanvas2y");//smartnote25
+var canvas2z = document.getElementById("myCanvas2z");//smartnote26
+var canvas2aa = document.getElementById("myCanvas2aa");//smartnote27
+var canvas2bb = document.getElementById("myCanvas2bb");//smartnote28
+var canvas2cc = document.getElementById("myCanvas2cc");//smartnote29
+var canvas2dd = document.getElementById("myCanvas2dd");//smartnote30
+var canvas2ee = document.getElementById("myCanvas2ee");//smartnote31
+var canvas2ff = document.getElementById("myCanvas2ff");//smartnote32
+var canvas2gg = document.getElementById("myCanvas2gg");//smartnote33
+var canvas2hh = document.getElementById("myCanvas2hh");//smartnote34
+var canvas2ii = document.getElementById("myCanvas2ii");//smartnote35
+var canvas2jj = document.getElementById("myCanvas2jj");//smartnote36
+var canvas2kk = document.getElementById("myCanvas2kk");//smartnote37
+var canvas2ll = document.getElementById("myCanvas2ll");//smartnote38
+var canvas2mm = document.getElementById("myCanvas2mm");//smartnote39
+var canvas2nn = document.getElementById("myCanvas2nn");//smartnote40
+var canvas2oo = document.getElementById("myCanvas2oo");//smartnote41
+var canvas2pp = document.getElementById("myCanvas2pp");//smartnote42
+var canvas2qq = document.getElementById("myCanvas2qq");//smartnote43
+var canvas2rr = document.getElementById("myCanvas2rr");//smartnote44
+var canvas2ss = document.getElementById("myCanvas2ss");//smartnote45
+var canvas2tt = document.getElementById("myCanvas2tt");//smartnote46
+var canvas2uu = document.getElementById("myCanvas2uu");//smartnote47
+var canvas2vv = document.getElementById("myCanvas2vv");//smartnote48
+var canvas2ww = document.getElementById("myCanvas2ww");//smartnote49
+var canvas2xx = document.getElementById("myCanvas2xx");//smartnote50
+
+var addButton = document.getElementById("Add");
+
+var company_tag =""; //company name
+var smartnote1_tag = ""; //smartNote1 Firestore path (read from structure file)
+var smartnote2_tag = ""; //smartNote2 Firestore path (read from structure file)
+var smartnote3_tag = ""; //smartNote3 Firestore path (read from structure file)
+var smartnote4_tag = ""; //smartNote4 Firestore path (read from structure file)
+var smartnote5_tag = ""; //smartNote5 Firestore path (read from structure file)
+var smartnote6_tag = ""; //smartNote6 Firestore path (read from structure file)
+var smartnote7_tag = ""; //smartNote7 Firestore path (read from structure file)
+var smartnote8_tag = ""; //smartNote8 Firestore path (read from structure file)
+var smartnote9_tag = ""; //smartNote9 Firestore path (read from structure file)
+var smartnote10_tag = ""; //smartNote10 Firestore path (read from structure file)
+var smartnote11_tag = ""; //smartNote11 Firestore path (read from structure file)
+var smartnote12_tag = ""; //smartNote12 Firestore path (read from structure file)
+var smartnote13_tag = ""; //smartNote13 Firestore path (read from structure file)
+var smartnote14_tag = ""; //smartNote14 Firestore path (read from structure file)
+var smartnote15_tag = ""; //smartNote15 Firestore path (read from structure file)
+var smartnote16_tag = ""; //smartNote16 Firestore path (read from structure file)
+var smartnote17_tag = ""; //smartNote17 Firestore path (read from structure file)
+var smartnote18_tag = ""; //smartNote18 Firestore path (read from structure file)
+var smartnote19_tag = ""; //smartNote19 Firestore path (read from structure file)
+var smartnote20_tag = ""; //smartNote20 Firestore path (read from structure file)
+var smartnote21_tag = ""; //smartNote21 Firestore path (read from structure file)
+var smartnote22_tag = ""; //smartNote22 Firestore path (read from structure file)
+var smartnote23_tag = ""; //smartNote23 Firestore path (read from structure file)
+var smartnote24_tag = ""; //smartNote24 Firestore path (read from structure file)
+var smartnote25_tag = ""; //smartNote25 Firestore path (read from structure file)
+var smartnote26_tag = ""; //smartNote26 Firestore path (read from structure file)
+var smartnote27_tag = ""; //smartNote27 Firestore path (read from structure file)
+var smartnote28_tag = ""; //smartNote28 Firestore path (read from structure file)
+var smartnote29_tag = ""; //smartNote29 Firestore path (read from structure file)
+var smartnote30_tag = ""; //smartNote30 Firestore path (read from structure file)
+var smartnote31_tag = ""; //smartNote31 Firestore path (read from structure file)
+var smartnote32_tag = ""; //smartNote32 Firestore path (read from structure file)
+var smartnote33_tag = ""; //smartNote33 Firestore path (read from structure file)
+var smartnote34_tag = ""; //smartNote34 Firestore path (read from structure file)
+var smartnote35_tag = ""; //smartNote35 Firestore path (read from structure file)
+var smartnote36_tag = ""; //smartNote36 Firestore path (read from structure file)
+var smartnote37_tag = ""; //smartNote37 Firestore path (read from structure file)
+var smartnote38_tag = ""; //smartNote38 Firestore path (read from structure file)
+var smartnote39_tag = ""; //smartNote39 Firestore path (read from structure file)
+var smartnote40_tag = ""; //smartNote40 Firestore path (read from structure file)
+var smartnote41_tag = ""; //smartNote41 Firestore path (read from structure file)
+var smartnote42_tag = ""; //smartNote42 Firestore path (read from structure file)
+var smartnote43_tag = ""; //smartNote43 Firestore path (read from structure file)
+var smartnote44_tag = ""; //smartNote44 Firestore path (read from structure file)
+var smartnote45_tag = ""; //smartNote45 Firestore path (read from structure file)
+var smartnote46_tag = ""; //smartNote46 Firestore path (read from structure file)
+var smartnote47_tag = ""; //smartNote47 Firestore path (read from structure file)
+var smartnote48_tag = ""; //smartNote48 Firestore path (read from structure file)
+var smartnote49_tag = ""; //smartNote49 Firestore path (read from structure file)
+var smartnote50_tag = ""; //smartNote50 Firestore path (read from structure file)
+//----------------------------------------------------------------------------//
+var logo_company = "";
+var image_smartNote1_tag = "";//smartNote1 image file from local drive
+var image_smartNote2_tag = "";//smartNote2 image file from local drive
+var image_smartNote3_tag = "";//smartnote3 image file from local drive
+var image_smartNote4_tag = "";//smartnote4 image file from local drive
+var image_smartNote5_tag = "";//smartnote5 image file from local drive
+var image_smartNote6_tag = "";//smartnote6 image file from local drive
+var image_smartNote7_tag = "";//smartnote7 image file from local drive
+var image_smartNote8_tag = "";//smartnote8 image file from local drive
+var image_smartNote9_tag = "";//smartnote9 image file from local drive
+var image_smartNote10_tag = "";//smartnote10 image file from local drive
+var image_smartNote11_tag = "";//smartnote11 image file from local drive
+var image_smartNote12_tag = "";//smartnote12 image file from local drive
+var image_smartNote13_tag = "";//smartnote13 image file from local drive
+var image_smartNote14_tag = "";//smartnote14 image file from local drive
+var image_smartNote15_tag = "";//smartnote15 image file from local drive
+var image_smartNote16_tag = "";//smartnote16 image file from local drive
+var image_smartNote17_tag = "";//smartnote17 image file from local drive
+var image_smartNote18_tag = "";//smartnote18 image file from local drive
+var image_smartNote19_tag = "";//smartnote19 image file from local drive
+var image_smartNote20_tag = "";//smartnote20 image file from local drive
+var image_smartNote21_tag = "";//smartNote21 image file from local drive
+var image_smartNote22_tag = "";//smartNote22 image file from local drive
+var image_smartNote23_tag = "";//smartnote23 image file from local drive
+var image_smartNote24_tag = "";//smartnote24 image file from local drive
+var image_smartNote25_tag = "";//smartnote25 image file from local drive
+var image_smartNote26_tag = "";//smartnote26 image file from local drive
+var image_smartNote27_tag = "";//smartnote27 image file from local drive
+var image_smartNote28_tag = "";//smartnote28 image file from local drive
+var image_smartNote29_tag = "";//smartnote29 image file from local drive
+var image_smartNote30_tag = "";//smartnote30 image file from local drive
+var image_smartNote31_tag = "";//smartNote31 image file from local drive
+var image_smartNote32_tag = "";//smartNote32 image file from local drive
+var image_smartNote33_tag = "";//smartnote33 image file from local drive
+var image_smartNote34_tag = "";//smartnote34 image file from local drive
+var image_smartNote35_tag = "";//smartnote35 image file from local drive
+var image_smartNote36_tag = "";//smartnote36 image file from local drive
+var image_smartNote37_tag = "";//smartnote37 image file from local drive
+var image_smartNote38_tag = "";//smartnote38 image file from local drive
+var image_smartNote39_tag = "";//smartnote39 image file from local drive
+var image_smartNote40_tag = "";//smartnote40 image file from local drive
+var image_smartNote41_tag = "";//smartNote41 image file from local drive
+var image_smartNote42_tag = "";//smartNote42 image file from local drive
+var image_smartNote43_tag = "";//smartnote43 image file from local drive
+var image_smartNote44_tag = "";//smartnote44 image file from local drive
+var image_smartNote45_tag = "";//smartnote45 image file from local drive
+var image_smartNote46_tag = "";//smartnote46 image file from local drive
+var image_smartNote47_tag = "";//smartnote47 image file from local drive
+var image_smartNote48_tag = "";//smartnote48 image file from local drive
+var image_smartNote49_tag = "";//smartnote49 image file from local drive
+var image_smartNote50_tag = "";//smartnote50 image file from local drive
+
+
+//size of the table for the report
+var num_smartNotes = 0;
+
+clientInput.addEventListener('change',function(e) {
+  var fileClient = clientInput.files[0];
+  var textType = /text.*/;
+
+  if (fileClient.type.match(textType)) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+          var content = reader.result;
+          //Here the content has been read successfuly
+          alert(content);
+
+          //prepare the JSON file to be read in
+          var objtext = {content}
+          //debugging statement
+          console.log(content)
+          var obj = JSON.parse(content);
+
+          //read in the size of the table for the generated report
+          num_smartNotes = obj.size;
+
+          //read in the the company logo file from local drive
+          logo_company = obj.logo
+          //debugging statement
+          console.log("Logo  " + logo_company)
+
+          //read in the name of the company from the structure file
+          company_tag = obj.company;
+
+          if (num_smartNotes > 0)
+          {
+            //read in the path of the smartNote 1 from the structure file
+            smartnote1_tag = obj.smartNote1;
+            image_smartNote1_tag = obj.image_smartNote1;
+          }
+          //debugging statement
+          console.log(smartnote1_tag)
+
+          if (num_smartNotes > 1)
+          {
+            //read in the path of the smartNote 2 from the structure file
+            smartnote2_tag = obj.smartNote2;
+            image_smartNote2_tag = obj.image_smartNote2;
+          }
+          //debugging statement
+          console.log(smartnote2_tag)
+
+          if (num_smartNotes > 2)
+          {
+            //read in the path of the smartNote 3 from the structure file
+            smartnote3_tag = obj.smartNote3;
+            image_smartNote3_tag = obj.image_smartNote3;
+          }
+          //debugging statement
+          console.log(smartnote3_tag)
+
+          if (num_smartNotes > 3)
+          {
+            //read in the path of the smartNote 4 from the structure file
+            smartnote4_tag = obj.smartNote4;
+            image_smartNote4_tag = obj.image_smartNote4;
+          }
+          //debugging statement
+          console.log(smartnote4_tag)
+
+          if (num_smartNotes > 4)
+          {
+            //read in the path of the smartNote 5 from the structure file
+            smartnote5_tag = obj.smartNote5;
+            image_smartNote5_tag = obj.image_smartNote5;
+          }
+          //debugging statement
+          console.log(smartnote5_tag)
+
+          if (num_smartNotes > 5)
+          {
+            //read in the path of the smartNote 6 from the structure file
+            smartnote6_tag = obj.smartNote6;
+            image_smartNote6_tag = obj.image_smartNote6;
+          }
+          //debugging statement
+          console.log(smartnote6_tag)
+
+          if (num_smartNotes > 6)
+          {
+            //read in the path of the smartNote 7 from the structure file
+            smartnote7_tag = obj.smartNote7;
+            image_smartNote7_tag = obj.image_smartNote7;
+          }
+          //debugging statement
+          console.log(smartnote7_tag)
+
+          if (num_smartNotes > 7)
+          {
+            //read in the path of the smartNote 8 from the structure file
+            smartnote8_tag = obj.smartNote8;
+            image_smartNote8_tag = obj.image_smartNote8;
+          }
+          //debugging statement
+          console.log(smartnote8_tag)
+
+          if (num_smartNotes > 8)
+          {
+            //read in the path of the smartNote 9 from the structure file
+            smartnote9_tag = obj.smartNote9;
+            image_smartNote9_tag = obj.image_smartNote9;
+          }
+          //debugging statement
+          console.log(smartnote9_tag)
+
+          if (num_smartNotes > 9)
+          {
+            //read in the path of the smartNote 10 from the structure file
+            smartnote10_tag = obj.smartNote10;
+            image_smartNote10_tag = obj.image_smartNote10;
+          }
+          //debugging statement
+          console.log(smartnote10_tag)
+
+          if (num_smartNotes > 10)
+          {
+            //read in the path of the smartNote 11 from the structure file
+            smartnote11_tag = obj.smartNote11;
+            image_smartNote11_tag = obj.image_smartNote11;
+          }
+          //debugging statement
+          console.log(smartnote11_tag)
+
+          if (num_smartNotes > 11)
+          {
+            //read in the path of the smartNote 12 from the structure file
+            smartnote12_tag = obj.smartNote12;
+            image_smartNote12_tag = obj.image_smartNote12;
+          }
+          //debugging statement
+          console.log(smartnote12_tag)
+
+          if (num_smartNotes > 12)
+          {
+            //read in the path of the smartNote 13 from the structure file
+            smartnote13_tag = obj.smartNote13;
+            image_smartNote13_tag = obj.image_smartNote13;
+          }
+          //debugging statement
+          console.log(smartnote13_tag)
+
+          if (num_smartNotes > 13)
+          {
+            //read in the path of the smartNote 14 from the structure file
+            smartnote14_tag = obj.smartNote14;
+            image_smartNote14_tag = obj.image_smartNote14;
+          }
+          //debugging statement
+          console.log(smartnote14_tag)
+
+          if (num_smartNotes > 14)
+          {
+            //read in the path of the smartNote 15 from the structure file
+            smartnote15_tag = obj.smartNote15;
+            image_smartNote15_tag = obj.image_smartNote15;
+          }
+          //debugging statement
+          console.log(smartnote15_tag)
+
+          if (num_smartNotes > 15)
+          {
+            //read in the path of the smartNote 16 from the structure file
+            smartnote16_tag = obj.smartNote16;
+            image_smartNote16_tag = obj.image_smartNote16;
+          }
+          //debugging statement
+          console.log(smartnote16_tag)
+
+          if (num_smartNotes > 16)
+          {
+            //read in the path of the smartNote 17 from the structure file
+            smartnote17_tag = obj.smartNote17;
+            image_smartNote17_tag = obj.image_smartNote17;
+          }
+          //debugging statement
+          console.log(smartnote17_tag)
+
+          if (num_smartNotes > 17)
+          {
+            //read in the path of the smartNote 18 from the structure file
+            smartnote18_tag = obj.smartNote18;
+            image_smartNote18_tag = obj.image_smartNote18;
+          }
+          //debugging statement
+          console.log(smartnote18_tag)
+
+          if (num_smartNotes > 18)
+          {
+            //read in the path of the smartNote 19 from the structure file
+            smartnote19_tag = obj.smartNote19;
+            image_smartNote19_tag = obj.image_smartNote19;
+          }
+          //debugging statement
+          console.log(smartnote19_tag)
+
+          if (num_smartNotes > 19)
+          {
+            //read in the path of the smartNote 20 from the structure file
+            smartnote20_tag = obj.smartNote20;
+            image_smartNote20_tag = obj.image_smartNote20;
+          }
+          //debugging statement
+          console.log(smartnote20_tag)
+
+          if (num_smartNotes > 20)
+          {
+            //read in the path of the smartNote 21 from the structure file
+            smartnote21_tag = obj.smartNote21;
+            image_smartNote21_tag = obj.image_smartNote21;
+          }
+          //debugging statement
+          console.log(smartnote21_tag)
+
+          if (num_smartNotes > 21)
+          {
+            //read in the path of the smartNote 22 from the structure file
+            smartnote22_tag = obj.smartNote22;
+            image_smartNote22_tag = obj.image_smartNote22;
+          }
+          //debugging statement
+          console.log(smartnote22_tag)
+
+          if (num_smartNotes > 22)
+          {
+            //read in the path of the smartNote 23 from the structure file
+            smartnote23_tag = obj.smartNote23;
+            image_smartNote23_tag = obj.image_smartNote23;
+          }
+          //debugging statement
+          console.log(smartnote23_tag)
+
+          if (num_smartNotes > 23)
+          {
+            //read in the path of the smartNote 24 from the structure file
+            smartnote24_tag = obj.smartNote24;
+            image_smartNote24_tag = obj.image_smartNote24;
+          }
+          //debugging statement
+          console.log(smartnote24_tag)
+
+          if (num_smartNotes > 24)
+          {
+            //read in the path of the smartNote 25 from the structure file
+            smartnote25_tag = obj.smartNote25;
+            image_smartNote25_tag = obj.image_smartNote25;
+          }
+          //debugging statement
+          console.log(smartnote25_tag)
+
+          if (num_smartNotes > 25)
+          {
+            //read in the path of the smartNote 26 from the structure file
+            smartnote26_tag = obj.smartNote26;
+            image_smartNote26_tag = obj.image_smartNote26;
+          }
+          //debugging statement
+          console.log(smartnote26_tag)
+
+          if (num_smartNotes > 26)
+          {
+            //read in the path of the smartNote 27 from the structure file
+            smartnote27_tag = obj.smartNote27;
+            image_smartNote27_tag = obj.image_smartNote27;
+          }
+          //debugging statement
+          console.log(smartnote27_tag)
+
+          if (num_smartNotes > 27)
+          {
+            //read in the path of the smartNote 28 from the structure file
+            smartnote28_tag = obj.smartNote28;
+            image_smartNote28_tag = obj.image_smartNote28;
+          }
+          //debugging statement
+          console.log(smartnote28_tag)
+
+          if (num_smartNotes > 28)
+          {
+            //read in the path of the smartNote 29 from the structure file
+            smartnote29_tag = obj.smartNote29;
+            image_smartNote29_tag = obj.image_smartNote29;
+          }
+          //debugging statement
+          console.log(smartnote29_tag)
+
+          if (num_smartNotes > 29)
+          {
+            //read in the path of the smartNote 30 from the structure file
+            smartnote30_tag = obj.smartNote30;
+            image_smartNote30_tag = obj.image_smartNote30;
+          }
+          //debugging statement
+          console.log(smartnote30_tag)
+
+          if (num_smartNotes > 30)
+          {
+            //read in the path of the smartNote 31 from the structure file
+            smartnote31_tag = obj.smartNote31;
+            image_smartNote31_tag = obj.image_smartNote31;
+          }
+          //debugging statement
+          console.log(smartnote31_tag)
+
+          if (num_smartNotes > 31)
+          {
+            //read in the path of the smartNote 32 from the structure file
+            smartnote32_tag = obj.smartNote32;
+            image_smartNote32_tag = obj.image_smartNote32;
+          }
+          //debugging statement
+          console.log(smartnote32_tag)
+
+          if (num_smartNotes > 32)
+          {
+            //read in the path of the smartNote 33 from the structure file
+            smartnote33_tag = obj.smartNote33;
+            image_smartNote33_tag = obj.image_smartNote33;
+          }
+          //debugging statement
+          console.log(smartnote33_tag)
+
+          if (num_smartNotes > 33)
+          {
+            //read in the path of the smartNote 34 from the structure file
+            smartnote34_tag = obj.smartNote34;
+            image_smartNote34_tag = obj.image_smartNote34;
+          }
+          //debugging statement
+          console.log(smartnote34_tag)
+
+          if (num_smartNotes > 34)
+          {
+            //read in the path of the smartNote 35 from the structure file
+            smartnote35_tag = obj.smartNote35;
+            image_smartNote35_tag = obj.image_smartNote35;
+          }
+          //debugging statement
+          console.log(smartnote35_tag)
+
+          if (num_smartNotes > 35)
+          {
+            //read in the path of the smartNote 36 from the structure file
+            smartnote36_tag = obj.smartNote36;
+            image_smartNote36_tag = obj.image_smartNote36;
+          }
+          //debugging statement
+          console.log(smartnote36_tag)
+
+          if (num_smartNotes > 36)
+          {
+            //read in the path of the smartNote 37 from the structure file
+            smartnote37_tag = obj.smartNote37;
+            image_smartNote37_tag = obj.image_smartNote37;
+          }
+          //debugging statement
+          console.log(smartnote37_tag)
+
+          if (num_smartNotes > 37)
+          {
+            //read in the path of the smartNote 38 from the structure file
+            smartnote38_tag = obj.smartNote38;
+            image_smartNote38_tag = obj.image_smartNote38;
+          }
+          //debugging statement
+          console.log(smartnote38_tag)
+
+          if (num_smartNotes > 38)
+          {
+            //read in the path of the smartNote 39 from the structure file
+            smartnote39_tag = obj.smartNote39;
+            image_smartNote39_tag = obj.image_smartNote39;
+          }
+          //debugging statement
+          console.log(smartnote39_tag)
+
+          if (num_smartNotes > 39)
+          {
+            //read in the path of the smartNote 40 from the structure file
+            smartnote40_tag = obj.smartNote40;
+            image_smartNote40_tag = obj.image_smartNote40;
+          }
+          //debugging statement
+          console.log(smartnote10_tag)
+          if (num_smartNotes > 40)
+          {
+            //read in the path of the smartNote 41 from the structure file
+            smartnote41_tag = obj.smartNote41;
+            image_smartNote41_tag = obj.image_smartNote41;
+          }
+          //debugging statement
+          console.log(smartnote41_tag)
+
+          if (num_smartNotes > 41)
+          {
+            //read in the path of the smartNote 42 from the structure file
+            smartnote42_tag = obj.smartNote42;
+            image_smartNote42_tag = obj.image_smartNote42;
+          }
+          //debugging statement
+          console.log(smartnote42_tag)
+
+          if (num_smartNotes > 42)
+          {
+            //read in the path of the smartNote 43 from the structure file
+            smartnote43_tag = obj.smartNote43;
+            image_smartNote43_tag = obj.image_smartNote43;
+          }
+          //debugging statement
+          console.log(smartnote43_tag)
+
+          if (num_smartNotes > 43)
+          {
+            //read in the path of the smartNote 44 from the structure file
+            smartnote44_tag = obj.smartNote44;
+            image_smartNote44_tag = obj.image_smartNote44;
+          }
+          //debugging statement
+          console.log(smartnote44_tag)
+
+          if (num_smartNotes > 44)
+          {
+            //read in the path of the smartNote 45 from the structure file
+            smartnote45_tag = obj.smartNote45;
+            image_smartNote45_tag = obj.image_smartNote45;
+          }
+          //debugging statement
+          console.log(smartnote45_tag)
+
+          if (num_smartNotes > 45)
+          {
+            //read in the path of the smartNote 46 from the structure file
+            smartnote46_tag = obj.smartNote46;
+            image_smartNote46_tag = obj.image_smartNote46;
+          }
+          //debugging statement
+          console.log(smartnote46_tag)
+
+          if (num_smartNotes > 46)
+          {
+            //read in the path of the smartNote 47 from the structure file
+            smartnote47_tag = obj.smartNote47;
+            image_smartNote47_tag = obj.image_smartNote47;
+          }
+          //debugging statement
+          console.log(smartnote47_tag)
+
+          if (num_smartNotes > 47)
+          {
+            //read in the path of the smartNote 48 from the structure file
+            smartnote48_tag = obj.smartNote48;
+            image_smartNote48_tag = obj.image_smartNote48;
+          }
+          //debugging statement
+          console.log(smartnote48_tag)
+
+          if (num_smartNotes > 48)
+          {
+            //read in the path of the smartNote 49 from the structure file
+            smartnote49_tag = obj.smartNote49;
+            image_smartNote49_tag = obj.image_smartNote49;
+          }
+          //debugging statement
+          console.log(smartnote49_tag)
+
+          if (num_smartNotes > 49)
+          {
+            //read in the path of the smartNote 50 from the structure file
+            smartnote50_tag = obj.smartNote50;
+            image_smartNote50_tag = obj.image_smartNote50;
+          }
+          //debugging statement
+          console.log(smartnote50_tag)
+      }
+      reader.readAsText(fileClient);
+  } else {
+    console.log("File not supported!")
+  }
+});
+
+//----------------------------------------------------------------------------//
+addButton.addEventListener("click",handleImagenMapToPdf);
+
+var files;
+function handleFileSelect(evt) {
+
+  if (num_smartNotes > 0)
+  {
+    //read in the smartNote 1 from Firestore
+    docRef3 = firestore.doc(smartnote1_tag);
+  }
+  if (num_smartNotes > 1)
+  {
+    //read in the smartNote 2 from Firestore
+    docRef4 = firestore.doc(smartnote2_tag);
+  }
+  if (num_smartNotes > 2)
+  {
+    //read in the smartNote 3 from Firestore
+    docRef5 = firestore.doc(smartnote3_tag);
+  }
+  if (num_smartNotes > 3)
+  {
+    //read in the smartNote 4 from Firestore
+    docRef6 = firestore.doc(smartnote4_tag);
+  }
+  if (num_smartNotes > 4)
+  {
+    //read in the smartNote 5 from Firestore
+    docRef7 = firestore.doc(smartnote5_tag);
+  }
+  if (num_smartNotes > 5)
+  {
+    //read in the smartNote 6 from Firestore
+    docRef8 = firestore.doc(smartnote6_tag);
+  }
+  if (num_smartNotes > 6)
+  {
+    //read in the smartNote 7 from Firestore
+    docRef9 = firestore.doc(smartnote7_tag);
+  }
+  if (num_smartNotes > 7)
+  {
+    //read in the smartNote 8 from Firestore
+    docRef10 = firestore.doc(smartnote8_tag);
+  }
+  if (num_smartNotes > 8)
+  {
+    //read in the smartNote 9 from Firestore
+    docRef11 = firestore.doc(smartnote9_tag);
+  }
+  if (num_smartNotes > 9)
+  {
+    //read in the smartNote 10 from Firestore
+    docRef13 = firestore.doc(smartnote10_tag);
+  }
+  if (num_smartNotes > 10)
+  {
+    //read in the smartNote 11 from Firestore
+    docRef14 = firestore.doc(smartnote11_tag);
+  }
+  if (num_smartNotes > 11)
+  {
+    //read in the smartNote 12 from Firestore
+    docRef15 = firestore.doc(smartnote12_tag);
+  }
+  if (num_smartNotes > 12)
+  {
+    //read in the smartNote 13 from Firestore
+    docRef16 = firestore.doc(smartnote13_tag);
+  }
+  if (num_smartNotes > 13)
+  {
+    //read in the smartNote 14 from Firestore
+    docRef17 = firestore.doc(smartnote14_tag);
+  }
+  if (num_smartNotes > 14)
+  {
+    //read in the smartNote 15 from Firestore
+    docRef18 = firestore.doc(smartnote15_tag);
+  }
+  if (num_smartNotes > 15)
+  {
+    //read in the smartNote 16 from Firestore
+    docRef19 = firestore.doc(smartnote16_tag);
+  }
+  if (num_smartNotes > 16)
+  {
+    //read in the smartNote 17 from Firestore
+    docRef20 = firestore.doc(smartnote17_tag);
+  }
+  if (num_smartNotes > 17)
+  {
+    //read in the smartNote 18 from Firestore
+    docRef21 = firestore.doc(smartnote18_tag);
+  }
+  if (num_smartNotes > 18)
+  {
+    //read in the smartNote 19 from Firestore
+    docRef22 = firestore.doc(smartnote19_tag);
+  }
+  if (num_smartNotes > 19)
+  {
+    //read in the smartNote 20 from Firestore
+    docRef23 = firestore.doc(smartnote20_tag);
+  }
+  if (num_smartNotes > 20)
+  {
+    //read in the smartNote 21 from Firestore
+    docRef24 = firestore.doc(smartnote21_tag);
+  }
+  if (num_smartNotes > 21)
+  {
+    //read in the smartNote 22 from Firestore
+    docRef25 = firestore.doc(smartnote22_tag);
+  }
+  if (num_smartNotes > 22)
+  {
+    //read in the smartNote 23 from Firestore
+    docRef26 = firestore.doc(smartnote23_tag);
+  }
+  if (num_smartNotes > 23)
+  {
+    //read in the smartNote 24 from Firestore
+    docRef27 = firestore.doc(smartnote24_tag);
+  }
+  if (num_smartNotes > 24)
+  {
+    //read in the smartNote 25 from Firestore
+    docRef28 = firestore.doc(smartnote25_tag);
+  }
+  if (num_smartNotes > 25)
+  {
+    //read in the smartNote 26 from Firestore
+    docRef29 = firestore.doc(smartnote26_tag);
+  }
+  if (num_smartNotes > 26)
+  {
+    //read in the smartNote 27 from Firestore
+    docRef30 = firestore.doc(smartnote27_tag);
+  }
+  if (num_smartNotes > 27)
+  {
+    //read in the smartNote 28 from Firestore
+    docRef31 = firestore.doc(smartnote28_tag);
+  }
+  if (num_smartNotes > 28)
+  {
+    //read in the smartNote 29 from Firestore
+    docRef32 = firestore.doc(smartnote29_tag);
+  }
+  if (num_smartNotes > 29)
+  {
+    //read in the smartNote 30 from Firestore
+    docRef33 = firestore.doc(smartnote30_tag);
+  }
+  if (num_smartNotes > 30)
+  {
+    //read in the smartNote 31 from Firestore
+    docRef34 = firestore.doc(smartnote31_tag);
+  }
+  if (num_smartNotes > 31)
+  {
+    //read in the smartNote 32 from Firestore
+    docRef35 = firestore.doc(smartnote32_tag);
+  }
+  if (num_smartNotes > 32)
+  {
+    //read in the smartNote 33 from Firestore
+    docRef36 = firestore.doc(smartnote33_tag);
+  }
+  if (num_smartNotes > 33)
+  {
+    //read in the smartNote 34 from Firestore
+    docRef37 = firestore.doc(smartnote34_tag);
+  }
+  if (num_smartNotes > 34)
+  {
+    //read in the smartNote 35 from Firestore
+    docRef38 = firestore.doc(smartnote35_tag);
+  }
+  if (num_smartNotes > 35)
+  {
+    //read in the smartNote 36 from Firestore
+    docRef39 = firestore.doc(smartnote36_tag);
+  }
+  if (num_smartNotes > 36)
+  {
+    //read in the smartNote 37 from Firestore
+    docRef40 = firestore.doc(smartnote37_tag);
+  }
+  if (num_smartNotes > 37)
+  {
+    //read in the smartNote 38 from Firestore
+    docRef41 = firestore.doc(smartnote38_tag);
+  }
+  if (num_smartNotes > 38)
+  {
+    //read in the smartNote 39 from Firestore
+    docRef42 = firestore.doc(smartnote39_tag);
+  }
+  if (num_smartNotes > 39)
+  {
+    //read in the smartNote 40 from Firestore
+    docRef43 = firestore.doc(smartnote40_tag);
+  }
+  if (num_smartNotes > 40)
+  {
+    //read in the smartNote 41 from Firestore
+    docRef44 = firestore.doc(smartnote41_tag);
+  }
+  if (num_smartNotes > 41)
+  {
+    //read in the smartNote 42 from Firestore
+    docRef45 = firestore.doc(smartnote42_tag);
+  }
+  if (num_smartNotes > 42)
+  {
+    //read in the smartNote 43 from Firestore
+    docRef46 = firestore.doc(smartnote43_tag);
+  }
+  if (num_smartNotes > 43)
+  {
+    //read in the smartNote 44 from Firestore
+    docRef47 = firestore.doc(smartnote44_tag);
+  }
+  if (num_smartNotes > 44)
+  {
+    //read in the smartNote 45 from Firestore
+    docRef48 = firestore.doc(smartnote45_tag);
+  }
+  if (num_smartNotes > 45)
+  {
+    //read in the smartNote 46 from Firestore
+    docRef49 = firestore.doc(smartnote46_tag);
+  }
+  if (num_smartNotes > 46)
+  {
+    //read in the smartNote 47 from Firestore
+    docRef50 = firestore.doc(smartnote47_tag);
+  }
+  if (num_smartNotes > 47)
+  {
+    //read in the smartNote 48 from Firestore
+    docRef51 = firestore.doc(smartnote48_tag);
+  }
+  if (num_smartNotes > 48)
+  {
+    //read in the smartNote 49 from Firestore
+    docRef52 = firestore.doc(smartnote49_tag);
+  }
+  if (num_smartNotes > 49)
+  {
+    //read in the smartNote 50 from Firestore
+    docRef53 = firestore.doc(smartnote50_tag);
+  }
+  files = evt.target.files; // FileList object
+  var arrayImages = [new Image().src, new Image().src];
+
+  // Loop through the File List and render image files as thumbnails.
+  var index = -1;
+  for (var i = 0, f; f = files[i]; i++) {
+    //debugging
+    //console.log("fung"+ f.name);
+
+    index = index + 1;
+    if (index == 8)
+    {
+      //debugging statement
+      //console.log(index)
+    }
+
+    // Only process image files.
+    if (!f.type.match('image.*')) {
+      continue;
+    }
+
+    var reader = new FileReader();
+
+    var ctx1a = canvas2a.getContext('2d');//smartnote1
+    var ctx1b = canvas2b.getContext('2d');//smartnote2
+    var ctx1c = canvas2c.getContext('2d');//smartnote3
+    var ctx1d = canvas2d.getContext('2d');//smartnote4
+    var ctx1e = canvas2e.getContext('2d');//smartnote5
+    var ctx1f = canvas2f.getContext('2d');//smartnote6
+    var ctx1g = canvas2g.getContext('2d');//smartnote7
+    var ctx1h = canvas2h.getContext('2d');//smartnote8
+    var ctx1i = canvas2i.getContext('2d');//smartnote9
+    var ctx1j = canvas2j.getContext('2d');//smartNote10
+    var ctx1k = canvas2k.getContext('2d');//smartnote11
+    var ctx1l = canvas2l.getContext('2d');//smartnote12
+    var ctx1m = canvas2m.getContext('2d');//smartnote13
+    var ctx1n = canvas2n.getContext('2d');//smartnote14
+    var ctx1o = canvas2o.getContext('2d');//smartnote15
+    var ctx1p = canvas2p.getContext('2d');//smartnote16
+    var ctx1q = canvas2q.getContext('2d');//smartnote17
+    var ctx1r = canvas2r.getContext('2d');//smartnote18
+    var ctx1s = canvas2s.getContext('2d');//smartnote19
+    var ctx1t = canvas2t.getContext('2d');//smartNote20
+    var ctx1u = canvas2u.getContext('2d');//smartnote21
+    var ctx1v = canvas2v.getContext('2d');//smartnote22
+    var ctx1w = canvas2w.getContext('2d');//smartnote23
+    var ctx1x = canvas2x.getContext('2d');//smartnote24
+    var ctx1y = canvas2y.getContext('2d');//smartnote25
+    var ctx1z = canvas2z.getContext('2d');//smartnote26
+    var ctx1aa = canvas2aa.getContext('2d');//smartnote27
+    var ctx1bb = canvas2bb.getContext('2d');//smartnote28
+    var ctx1cc = canvas2cc.getContext('2d');//smartnote29
+    var ctx1dd = canvas2dd.getContext('2d');//smartNote30
+    var ctx1ee = canvas2ee.getContext('2d');//smartnote31
+    var ctx1ff = canvas2ff.getContext('2d');//smartnote32
+    var ctx1gg = canvas2gg.getContext('2d');//smartnote33
+    var ctx1hh = canvas2hh.getContext('2d');//smartnote34
+    var ctx1ii = canvas2ii.getContext('2d');//smartnote35
+    var ctx1jj = canvas2jj.getContext('2d');//smartnote36
+    var ctx1kk = canvas2kk.getContext('2d');//smartnote37
+    var ctx1ll = canvas2ll.getContext('2d');//smartnote38
+    var ctx1mm = canvas2mm.getContext('2d');//smartnote39
+    var ctx1nn = canvas2nn.getContext('2d');//smartNote40
+    var ctx1oo = canvas2oo.getContext('2d');//smartnote41
+    var ctx1pp = canvas2pp.getContext('2d');//smartnote42
+    var ctx1qq = canvas2qq.getContext('2d');//smartnote43
+    var ctx1rr = canvas2rr.getContext('2d');//smartnote44
+    var ctx1ss = canvas2ss.getContext('2d');//smartnote45
+    var ctx1tt = canvas2tt.getContext('2d');//smartnote46
+    var ctx1uu = canvas2uu.getContext('2d');//smartnote47
+    var ctx1vv = canvas2vv.getContext('2d');//smartnote48
+    var ctx1ww = canvas2ww.getContext('2d');//smartnote49
+    var ctx1xx = canvas2xx.getContext('2d');//smartNote50
+
+
+    var ctx1 = canvas2.getContext('2d');//logo
+
+    // Reader to capture the file information.
+    reader.onload = (function(theFile) {
+      return function(e) {
+
+          // Render thumbnail.
+          var image = new Image();
+
+          //read in the logo image from structure file
+          if (theFile.name.localeCompare(logo_company)==0)
+          {
+
+            var span = document.createElement('span');
+
+            //prepare logo on HTML page
+            span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                              '" title="', escape(theFile.name), '"/>'].join('');
+            document.getElementById('list').insertBefore(span, null);
+          }
+
+          image.onload = function() {
+
+          if (theFile.name.localeCompare(logo_company)==0)
+          {
+            canvas2.width = image.width;
+            canvas2.height = image.height;
+            //debugging statement
+            console.log("image logo " + theFile.name + index)
+            //draw logo on canvas
+            ctx1.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote1_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2a.width = image.width;
+            canvas2a.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote1 from structure file
+            ctx1a.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote2_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2b.width = image.width;
+            canvas2b.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote2 from structure file
+            ctx1b.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote3_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2c.width = image.width;
+            canvas2c.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote3 from structure file
+            ctx1c.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote4_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2d.width = image.width;
+            canvas2d.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote4 from structure file
+            ctx1d.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote5_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2e.width = image.width;
+            canvas2e.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote5 from structure file
+            ctx1e.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote6_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2f.width = image.width;
+            canvas2f.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote6 from structure file
+            ctx1f.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote7_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2g.width = image.width;
+            canvas2g.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote7 from structure file
+            ctx1g.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote8_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2h.width = image.width;
+            canvas2h.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote8 from structure file
+            ctx1h.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote9_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2i.width = image.width;
+            canvas2i.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote9 from structure file
+            ctx1i.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote10_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2j.width = image.width;
+            canvas2j.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote10 from structure file
+            ctx1j.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote11_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2k.width = image.width;
+            canvas2k.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote11 from structure file
+            ctx1k.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote12_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2l.width = image.width;
+            canvas2l.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote12 from structure file
+            ctx1l.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote13_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2m.width = image.width;
+            canvas2m.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote13 from structure file
+            ctx1m.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote14_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2n.width = image.width;
+            canvas2n.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote14 from structure file
+            ctx1n.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote15_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2o.width = image.width;
+            canvas2o.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote15 from structure file
+            ctx1o.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote16_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2p.width = image.width;
+            canvas2p.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote16 from structure file
+            ctx1p.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote17_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2q.width = image.width;
+            canvas2q.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote7 from structure file
+            ctx1q.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote18_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2r.width = image.width;
+            canvas2r.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote8 from structure file
+            ctx1r.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote19_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2s.width = image.width;
+            canvas2s.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote9 from structure file
+            ctx1s.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote20_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2t.width = image.width;
+            canvas2t.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote10 from structure file
+            ctx1t.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote21_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2u.width = image.width;
+            canvas2u.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote1 from structure file
+            ctx1u.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote22_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2v.width = image.width;
+            canvas2v.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote2 from structure file
+            ctx1v.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote23_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2w.width = image.width;
+            canvas2w.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote3 from structure file
+            ctx1w.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote24_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2x.width = image.width;
+            canvas2x.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote4 from structure file
+            ctx1x.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote25_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2y.width = image.width;
+            canvas2y.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote5 from structure file
+            ctx1y.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote26_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2z.width = image.width;
+            canvas2z.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote6 from structure file
+            ctx1z.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote27_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2aa.width = image.width;
+            canvas2aa.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote7 from structure file
+            ctx1aa.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote28_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2bb.width = image.width;
+            canvas2bb.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote8 from structure file
+            ctx1bb.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote29_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2cc.width = image.width;
+            canvas2cc.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote9 from structure file
+            ctx1cc.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote30_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2dd.width = image.width;
+            canvas2dd.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote10 from structure file
+            ctx1dd.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote31_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2ee.width = image.width;
+            canvas2ee.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote1 from structure file
+            ctx1ee.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote32_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2ff.width = image.width;
+            canvas2ff.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote2 from structure file
+            ctx1ff.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote33_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2gg.width = image.width;
+            canvas2gg.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote3 from structure file
+            ctx1gg.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote34_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2hh.width = image.width;
+            canvas2hh.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote4 from structure file
+            ctx1hh.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote35_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2ii.width = image.width;
+            canvas2ii.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote5 from structure file
+            ctx1ii.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote36_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2jj.width = image.width;
+            canvas2jj.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote6 from structure file
+            ctx1jj.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote37_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2kk.width = image.width;
+            canvas2kk.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote7 from structure file
+            ctx1kk.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote38_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2ll.width = image.width;
+            canvas2ll.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote8 from structure file
+            ctx1ll.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote39_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2mm.width = image.width;
+            canvas2mm.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote9 from structure file
+            ctx1mm.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote40_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2nn.width = image.width;
+            canvas2nn.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote10 from structure file
+            ctx1nn.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote41_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2oo.width = image.width;
+            canvas2oo.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote1 from structure file
+            ctx1oo.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote42_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2pp.width = image.width;
+            canvas2pp.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote2 from structure file
+            ctx1pp.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote43_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2qq.width = image.width;
+            canvas2qq.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote3 from structure file
+            ctx1qq.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote44_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2rr.width = image.width;
+            canvas2rr.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index);
+            //draw image of smartnote4 from structure file
+            ctx1rr.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote45_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2ss.width = image.width;
+            canvas2ss.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote5 from structure file
+            ctx1ss.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote46_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2tt.width = image.width;
+            canvas2tt.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote6 from structure file
+            ctx1tt.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote47_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2uu.width = image.width;
+            canvas2uu.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote7 from structure file
+            ctx1uu.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote48_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2vv.width = image.width;
+            canvas2vv.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote8 from structure file
+            ctx1vv.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote49_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2ww.width = image.width;
+            canvas2ww.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote9 from structure file
+            ctx1ww.drawImage(image,10,10);
+          }
+          else if (theFile.name.localeCompare(image_smartNote50_tag)==0)
+          {
+            //NOT USED -for debugging
+            canvas2xx.width = image.width;
+            canvas2xx.height = image.height;
+            //debugging statement
+            console.log("image smartnote " + theFile.name + index)
+            //draw image of smartnote10 from structure file
+            ctx1xx.drawImage(image,10,10);
+          }
+        }//end image
+        image.src = e.target.result;
+      };
+    })(f);
+    // Read in the image file as a data URL.
+    reader.readAsDataURL(f);
+  }//end for
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+
+  function handleImagenMapToPdf(){
+
+    html2canvas(canvas2,{
+      onrendered:function(canvas2){
+
+        //PNG image data
+        var imgData = canvas2.toDataURL('image/png');
+
+        pdf.addImage(imgData,'PNG',9,15,80,35);
+
+        var canvas3 = document.getElementById("map1");
+
+        html2canvas(canvas3, {
+          useCORS: true, // MUST include it to avoid OS restrictions on rendering
+          onrendered: function(canvas3) {
+
+            var imgData3 = canvas3.toDataURL('image/png');
+            pdf.addImage(imgData3, 'PNG', 90, 15, 111, 82)// , width, height);
+          }//end onrendered
+        }); //end html2canvas canvas3
+      }//end canvas2
+    })//end html2canvas canvas2
+  }//end handleImagenMapTo
+ //---------------------------------------------------------------------------//
+
+ //---------------------------------------------------------------------------//
+
+</script>
+</html>
